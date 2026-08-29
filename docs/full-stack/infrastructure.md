@@ -115,7 +115,10 @@ export class PostsEventsAdapter {
   }
 
   dispose(): void {
-    this.unsubscribe?.()
+    if (this.unsubscribe) {
+      this.unsubscribe()
+    }
+
     this.unsubscribe = null
   }
 }

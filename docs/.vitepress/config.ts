@@ -43,7 +43,6 @@ export default defineConfig({
           { text: "Pages", link: "/architecture/pages" },
           { text: "Components", link: "/architecture/components" },
           { text: "Shared", link: "/architecture/shared" },
-          { text: "Providers", link: "/architecture/providers" },
         ],
       },
       {
@@ -95,7 +94,6 @@ export default defineConfig({
           { text: "Даты и dayjs", link: "/full-stack/dates" },
           { text: "Sass Modules и clsx", link: "/full-stack/styling" },
           { text: "Полная структура блога", link: "/full-stack/project-structure" },
-          { text: "Чек-лист полного стека", link: "/full-stack/checklist" },
         ],
       },
       {
@@ -106,13 +104,11 @@ export default defineConfig({
           { text: "Проверка контрактов", link: "/practices/testing" },
           { text: "Масштабирование stores", link: "/practices/store-scaling" },
           { text: "Миграция", link: "/practices/migration" },
-          { text: "Чек-листы", link: "/reference/checklists" },
           { text: "Структура Core-примера", link: "/reference/file-structure" },
-          { text: "FAQ", link: "/reference/faq" },
         ],
       },
       {
-        text: "Example project",
+        text: "Example repository",
         items: [
           { text: "О проекте и ссылка", link: "/example/" },
         ],

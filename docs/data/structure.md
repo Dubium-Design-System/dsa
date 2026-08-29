@@ -54,12 +54,13 @@ data/posts/
 
 ## 3. Технические папки
 
-Для большого редактора может быть удобнее:
+Для большого редактора может быть удобнее разделить файлы по техническим ролям:
 
 ```txt
 data/post-editor/
   model/
     post-editor.store.ts
+  types/
     post-editor.types.ts
   schema/
     post-form.schema.ts
@@ -70,13 +71,28 @@ data/post-editor/
 
 Техническая папка появляется из-за количества файлов, а не потому что «так положено».
 
+Если slice небольшой, те же файлы можно оставить плоско:
+
+```txt
+data/post-editor/
+  post-editor.store.ts
+  post-editor.types.ts
+  post-form.schema.ts
+  post-form.mapper.ts
+  index.ts
+```
+
+Главное правило: если технические папки уже появились, `*.types.ts` не кладите в `model/`. Для типов используйте отдельную `types/`.
+
 ## Что можно хранить в `model/`
 
-`model/` — допустимая группа для state-related кода:
+`model/` — группа для реализации состояния и поведения:
 
 - `*.store.ts`;
-- `*.types.ts`;
-- `*.vm.ts`.
+- `*.vm.ts`;
+- другие файлы, которые относятся к state/model implementation.
+
+Типы и интерфейсы хранятся отдельно в `types/`.
 
 Не создавайте абстрактный `post.model.ts`, если его роль непонятна.
 

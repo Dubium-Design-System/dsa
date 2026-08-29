@@ -17,7 +17,6 @@
 | Smart UI | React-компонент, который читает store | `PostsWidget` |
 | Dumb UI | React-компонент только на props | `PostsList` |
 | View model | Read-only композиция данных нескольких stores для одного представления | `PostDetailsVm` |
-| Provider | React Context, размещённый рядом с владельцем lifecycle | `PostEditorProvider` |
 
 ## Три термина, которые чаще всего путают
 

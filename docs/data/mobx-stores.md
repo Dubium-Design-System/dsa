@@ -62,36 +62,79 @@ export class PostsStore implements IPostsStore {
 
 Разделение интерфейса на state/actions/computed не обязательно для маленького store, но полезно в больших slices: контракт видно без чтения реализации.
 
-## Async actions
+## Асинхронная загрузка в store
 
-Store может координировать асинхронный сценарий, если зависимость передана ему через понятный контракт.
+Если UI должен показывать состояние загрузки, это состояние удобно хранить рядом с самими данными в MobX store.
+
+В этом сценарии store отвечает за три вещи:
+
+1. включить `isLoading` перед загрузкой;
+2. сохранить полученные посты;
+3. выключить `isLoading`, когда загрузка закончилась.
+
+Сам способ получения постов — отдельная зависимость. Store не должен знать, используется ли внутри HTTP-клиент, mock или другой источник данных.
 
 ```ts
-export interface IPostsSource {
-  load(): Promise<IPost[]>
+// data/posts/posts.types.ts
+export interface IPostsLoader {
+  loadPosts(): Promise<IPost[]>
 }
+```
+
+```ts
+// data/posts/posts.store.ts
+import { makeAutoObservable, runInAction } from "mobx"
+
+import type { IPost, IPostsLoader, IPostsStore } from "./posts.types"
 
 export class PostsStore implements IPostsStore {
   posts: IPost[] = []
   isLoading = false
 
-  constructor(private readonly source: IPostsSource) {
-    makeAutoObservable(this)
+  constructor(private readonly loader: IPostsLoader) {
+    makeAutoObservable(this, {
+      loader: false,
+    })
   }
 
   async load(): Promise<void> {
     this.isLoading = true
 
     try {
-      this.posts = await this.source.load()
+      const posts = await this.loader.loadPosts()
+
+      runInAction(() => {
+        this.posts = posts
+      })
     } finally {
-      this.isLoading = false
+      runInAction(() => {
+        this.isLoading = false
+      })
     }
   }
 }
 ```
 
-DSA не фиксирует технологию, которая реализует `IPostsSource`.
+Последовательность получается простой:
+
+```txt
+React
+  ↓ вызывает postsStore.load()
+MobX store
+  ↓ isLoading = true
+IPostsLoader
+  ↓ возвращает IPost[]
+MobX store
+  ↓ posts = result
+  ↓ isLoading = false
+React обновляется через observer
+```
+
+`IPostsLoader` здесь нужен только для того, чтобы отделить **управление состоянием** от **получения данных**. Это не отдельный обязательный слой DSA.
+
+Почему после `await` используется `runInAction`: выполнение после `await` происходит уже вне исходной MobX action. Изменения observable-состояния после `await` нужно снова выполнить внутри action.
+
+В Full Stack Guide роль загрузчика реализуется конкретной инфраструктурой и `data`-операцией. В Core важно только разделение ответственности: store управляет состоянием сценария, а транспорт не становится частью store.
 
 ## Store не должен
 
@@ -105,15 +148,13 @@ Store не должен:
 
 ## Singleton или локальный экземпляр
 
-App-wide список постов:
+Если список постов используется во всём приложении, экземпляр `PostsStore` может жить на уровне приложения и переиспользоваться между страницами.
 
-```ts
-export const postsStore = new PostsStore(postsSource)
-```
-
-Редактор конкретного поста может жить только вместе со страницей и создаваться локально.
+Если состояние относится только к конкретной странице или сценарию, экземпляр создаётся вместе с его владельцем и уничтожается вместе с ним.
 
 Главный вопрос: **кто владеет временем жизни состояния?**
+
+Создание конкретного `IPostsLoader` и связывание его со store относятся уже к композиции приложения. В [Full Stack Guide](/full-stack/posts-flow) показан законченный вариант с реальным HTTP-потоком.
 
 ## React-подключение
 

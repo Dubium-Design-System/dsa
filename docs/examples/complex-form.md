@@ -95,6 +95,9 @@ export const PostEditorForm = () => {
     },
   })
 
+  const titleField = register("title")
+  const bodyField = register("body")
+
   const submit = (values: PostFormValues) => {
     // Передайте проверенные значения владельцу сценария сохранения.
   }
@@ -103,13 +106,23 @@ export const PostEditorForm = () => {
     <form onSubmit={handleSubmit(submit)}>
       <label>
         Заголовок
-        <input {...register("title")} />
+        <input
+          name={titleField.name}
+          onBlur={titleField.onBlur}
+          onChange={titleField.onChange}
+          ref={titleField.ref}
+        />
       </label>
       {errors.title && <p>{errors.title.message}</p>}
 
       <label>
         Текст
-        <textarea {...register("body")} />
+        <textarea
+          name={bodyField.name}
+          onBlur={bodyField.onBlur}
+          onChange={bodyField.onChange}
+          ref={bodyField.ref}
+        />
       </label>
       {errors.body && <p>{errors.body.message}</p>}
 

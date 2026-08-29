@@ -8,7 +8,7 @@
 // data/posts/posts.schema.ts
 import { array, object, string } from "valibot"
 
-const PostSchema = object({
+export const PostSchema = object({
   id: string(),
   title: string(),
   body: string(),
@@ -27,8 +27,9 @@ export const PostsResponseSchema = object({
 // data/posts/posts.dto.ts
 import type { InferOutput } from "valibot"
 
-import { PostsResponseSchema } from "./posts.schema"
+import { PostSchema, PostsResponseSchema } from "./posts.schema"
 
+export type PostDto = InferOutput<typeof PostSchema>
 export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
 ```
 
@@ -64,12 +65,10 @@ export interface IPost {
 
 ```ts
 // data/posts/posts.mapper.ts
-import type { PostsResponseDto } from "./posts.dto"
+import type { PostDto } from "./posts.dto"
 import type { IPost } from "./posts.types"
 
-export const mapPostDtoToPost = (
-  dto: PostsResponseDto["posts"][number],
-): IPost => ({
+export const mapPostDtoToPost = (dto: PostDto): IPost => ({
   id: dto.id,
   title: dto.title,
   body: dto.body,

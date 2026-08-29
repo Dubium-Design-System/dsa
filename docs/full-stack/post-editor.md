@@ -189,6 +189,9 @@ export const PostEditorForm = observer(() => {
     },
   })
 
+  const titleField = form.register("title")
+  const contentField = form.register("content")
+
   const handleSubmit = form.handleSubmit(async (values) => {
     const postId = await postEditorStore.create(values)
 
@@ -199,8 +202,18 @@ export const PostEditorForm = observer(() => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input {...form.register("title")} />
-      <textarea {...form.register("content")} />
+      <input
+        name={titleField.name}
+        onBlur={titleField.onBlur}
+        onChange={titleField.onChange}
+        ref={titleField.ref}
+      />
+      <textarea
+        name={contentField.name}
+        onBlur={contentField.onBlur}
+        onChange={contentField.onChange}
+        ref={contentField.ref}
+      />
 
       {postEditorStore.error && (
         <p>{postEditorStore.error}</p>

@@ -8,14 +8,14 @@
 // data/posts/posts.schema.ts
 import { array, object, string } from "valibot"
 
+export const PostSchema = object({
+  id: string(),
+  title: string(),
+  published_at: string(),
+})
+
 export const PostsResponseSchema = object({
-  posts: array(
-    object({
-      id: string(),
-      title: string(),
-      published_at: string(),
-    }),
-  ),
+  posts: array(PostSchema),
 })
 ```
 
@@ -23,8 +23,9 @@ export const PostsResponseSchema = object({
 // data/posts/posts.dto.ts
 import type { InferOutput } from "valibot"
 
-import { PostsResponseSchema } from "./posts.schema"
+import { PostSchema, PostsResponseSchema } from "./posts.schema"
 
+export type PostDto = InferOutput<typeof PostSchema>
 export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
 ```
 
@@ -67,6 +68,17 @@ export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
 
 Так тип меняется вместе со schema.
 
+Для самостоятельной сущности создавайте самостоятельный DTO:
+
+```ts
+export type PostDto = InferOutput<typeof PostSchema>
+export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
+```
+
+Не извлекайте тип сущности через indexed access из поля response DTO.
+
+Такой подход скрывает контракт `Post` внутри структуры конкретного ответа. Если `PostDto` нужен mapper, store или другому контракту, он должен иметь собственное имя и выводиться из собственной schema.
+
 ## Mapper
 
 DTO описывает внешний контракт. Тип приложения описывает удобную внутреннюю форму.
@@ -80,9 +92,7 @@ export interface IPost {
 ```
 
 ```ts
-export const mapPostDtoToPost = (
-  dto: PostsResponseDto["posts"][number],
-): IPost => ({
+export const mapPostDtoToPost = (dto: PostDto): IPost => ({
   id: dto.id,
   title: dto.title,
   publishedAt: new Date(dto.published_at),

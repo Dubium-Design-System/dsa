@@ -35,15 +35,15 @@ export const api = axios.create({
 // data/posts/posts.schema.ts
 import { array, object, string } from "valibot"
 
+export const PostSchema = object({
+  id: string(),
+  title: string(),
+  excerpt: string(),
+  published_at: string(),
+})
+
 export const PostsResponseSchema = object({
-  posts: array(
-    object({
-      id: string(),
-      title: string(),
-      excerpt: string(),
-      published_at: string(),
-    }),
-  ),
+  posts: array(PostSchema),
 })
 ```
 
@@ -53,10 +53,10 @@ export const PostsResponseSchema = object({
 // data/posts/posts.dto.ts
 import type { InferOutput } from "valibot"
 
-import { PostsResponseSchema } from "./posts.schema"
+import { PostSchema, PostsResponseSchema } from "./posts.schema"
 
+export type PostDto = InferOutput<typeof PostSchema>
 export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
-export type PostDto = PostsResponseDto["posts"][number]
 ```
 
 ## 4. Внутренняя модель
@@ -160,7 +160,7 @@ export class PostsStore {
 export const postsStore = new PostsStore()
 ```
 
-Если проект использует общий `AxiosHandler`, часть request lifecycle может быть вынесена туда. Но domain state и тексты/семантика бизнес-сценария не должны случайно уехать в generic facade.
+HTTP-слой здесь отвечает только за transport. `PostsStore` по-прежнему владеет состоянием сценария: загрузкой, ошибкой и списком постов.
 
 ## 8. Public API
 

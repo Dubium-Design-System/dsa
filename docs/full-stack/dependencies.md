@@ -56,7 +56,7 @@ import { api } from "@/app/infrastructure/facade/axios"
 data → app/*
 ```
 
-Нельзя импортировать из `data` router, adapters, root providers или Error Boundary.
+Нельзя импортировать из `data` router, adapters или Error Boundary.
 
 ## Почему adapter может импортировать data
 

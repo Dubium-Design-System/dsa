@@ -4,6 +4,8 @@
 
 ## Router
 
+Маршруты блога объединены в одну ветку `/posts`. Общий route здесь используется как URL-префикс и не создаёт общий UI:
+
 ```tsx
 import { createBrowserRouter } from "react-router"
 
@@ -15,22 +17,40 @@ import { PostsPage } from "@/pages/Posts"
 export const router = createBrowserRouter([
   {
     path: "/posts",
-    element: <PostsPage />,
-  },
-  {
-    path: "/posts/new",
-    element: <CreatePostPage />,
-  },
-  {
-    path: "/posts/:postId",
-    element: <PostPage />,
-  },
-  {
-    path: "/posts/:postId/edit",
-    element: <EditPostPage />,
+    children: [
+      {
+        index: true,
+        element: <PostsPage />,
+      },
+      {
+        path: "new",
+        element: <CreatePostPage />,
+      },
+      {
+        path: ":postId",
+        element: <PostPage />,
+      },
+      {
+        path: ":postId/edit",
+        element: <EditPostPage />,
+      },
+    ],
   },
 ])
 ```
+
+Получается одна понятная ветка:
+
+```txt
+/posts
+├── /posts/new
+├── /posts/:postId
+└── /posts/:postId/edit
+```
+
+`PostsPage`, `CreatePostPage`, `PostPage` и `EditPostPage` остаются самостоятельными страницами. Они не вкладываются друг в друга как React-компоненты.
+
+Если этой ветке понадобится общий интерфейс, например общий header или навигация блога, родительскому route можно добавить layout с `<Outlet />`.
 
 ## Page читает параметр
 

@@ -149,17 +149,41 @@ Store может вернуть `postId`. Навигацию выполняет 
 
 Dumb-компонент на обычных props не обязан быть observer.
 
-## 14. Provider поднимается в `app` без причины
 
-Локальный `PostEditorProvider` не должен становиться глобальным только потому, что Context удобно подключить наверху.
+## 14. Структура создаётся заранее
 
-Размещайте provider рядом с владельцем lifecycle.
+Не создавайте пустые `api/`, `model/`, `types/`, `schema/`, `mapper/` для каждого slice.
 
-## 15. Структура создаётся заранее
+Начните плоско и разделяйте по мере роста. Когда технические папки появляются, не смешивайте роли: `*.types.ts` должны находиться в `types/`, а не в `model/`.
 
-Не создавайте пустые `api/`, `model/`, `schema/`, `mapper/` для каждого slice.
+## 15. Вызов функции через optional chaining
 
-Начните плоско и разделяйте по мере роста.
+Не используйте optional call для условного вызова функции. Сначала явно проверьте, что функция существует, и только потом вызывайте её.
+
+```ts
+if (this.unsubscribe) {
+  this.unsubscribe()
+}
+```
+
+Явная проверка делает условие вызова заметным и соответствует принятому стилю кода.
+
+## 16. Spread результата `register()` в JSX
+
+Не передавайте результат `register()` в элемент через spread. Props поля должны быть видны явно в JSX.
+
+```tsx
+const titleField = form.register("title")
+
+<input
+  name={titleField.name}
+  onBlur={titleField.onBlur}
+  onChange={titleField.onChange}
+  ref={titleField.ref}
+/>
+```
+
+Так по месту использования видно, какие обработчики и ссылки получает элемент, а добавление других props не скрывается внутри spread.
 
 ## Итоговая проверка
 
@@ -169,3 +193,28 @@ Dumb-компонент на обычных props не обязан быть obs
 2. Не вышел ли внешний контракт в React?
 3. Не идёт ли зависимость снизу вверх?
 4. Не появилось ли два источника истины?
+
+
+## DTO через indexed access
+
+Не выводите DTO самостоятельной сущности через indexed access из поля response DTO.
+
+Если `Post` — самостоятельный внешний контракт, у него должна быть собственная schema и собственный DTO:
+
+```ts
+// ✅ хорошо
+export const PostSchema = object({
+  id: string(),
+  title: string(),
+})
+
+export type PostDto = InferOutput<typeof PostSchema>
+
+export const PostsResponseSchema = object({
+  posts: array(PostSchema),
+})
+
+export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
+```
+
+Так `PostDto` не зависит от формы конкретного response envelope и остаётся явным контрактом.

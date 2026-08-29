@@ -22,14 +22,14 @@ data/posts/
 // data/posts/posts.schema.ts
 import { array, object, string } from "valibot"
 
+export const PostSchema = object({
+  id: string(),
+  title: string(),
+  published_at: string(),
+})
+
 export const PostsResponseSchema = object({
-  posts: array(
-    object({
-      id: string(),
-      title: string(),
-      published_at: string(),
-    }),
-  ),
+  posts: array(PostSchema),
 })
 ```
 
@@ -41,8 +41,9 @@ Schema отвечает на вопрос: **какие данные прило�
 // data/posts/posts.dto.ts
 import type { InferOutput } from "valibot"
 
-import { PostsResponseSchema } from "./posts.schema"
+import { PostSchema, PostsResponseSchema } from "./posts.schema"
 
+export type PostDto = InferOutput<typeof PostSchema>
 export type PostsResponseDto = InferOutput<typeof PostsResponseSchema>
 ```
 
@@ -80,12 +81,10 @@ export interface IPost {
 
 ```ts
 // data/posts/posts.mapper.ts
-import type { PostsResponseDto } from "./posts.dto"
+import type { PostDto } from "./posts.dto"
 import type { IPost } from "./posts.types"
 
-export const mapPostDtoToPost = (
-  dto: PostsResponseDto["posts"][number],
-): IPost => ({
+export const mapPostDtoToPost = (dto: PostDto): IPost => ({
   id: dto.id,
   title: dto.title,
   publishedAt: new Date(dto.published_at),

@@ -181,19 +181,35 @@ import { postsStore } from "@/data/posts"
 
 То есть Axios выполняет transport, но не становится владельцем домена.
 
-## Когда нужен AxiosHandler
+## Где проходит граница Axios
 
-Если проект использует общий `AxiosHandler` для loading, cancellation или нормализации transport lifecycle, он остаётся частью facade.
-
-Упрощённо:
+`data/posts` не должен придумывать специальный transport API только ради валидации.
+Достаточно получить ответ через настроенный Axios instance и считать внешний payload непроверенным:
 
 ```ts
-const request = new AxiosHandler(api)
+// data/posts/posts.api.ts
+import { api } from "@/app/infrastructure/facade/axios"
 
-const input = await request.getUnknown("/posts")
+export const getPostsResponse = async (): Promise<unknown> => {
+  const response = await api.get("/posts")
+
+  return response.data
+}
 ```
 
-Но domain schema всё равно остаётся в `data/posts`.
+Дальше `unknown` проверяется `PostsResponseSchema` внутри `data/posts`.
+
+Это важное разделение ответственности:
+
+```txt
+Axios        → выполняет HTTP-запрос
+response.data → внешний непроверенный payload
+Valibot      → проверяет контракт
+mapper       → преобразует DTO в тип приложения
+MobX store   → хранит состояние сценария
+```
+
+Не добавляйте в общий HTTP facade методы вроде `getPosts()`, `getPostDto()` или специальные методы под конкретную domain schema. Facade не должен знать, какие сущности существуют в `data`.
 
 ::: tip Проверка
 Если завтра Axios заменить другой библиотекой, `posts.schema.ts`, `posts.mapper.ts`, `posts.types.ts` и большая часть `PostsStore` не должны переписываться.
