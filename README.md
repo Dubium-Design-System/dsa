@@ -622,7 +622,7 @@ npm run build
 npm version patch --no-git-tag-version
 
 git add package.json package-lock.json
-git commit -m "release: v$(node -p "require('./package.json').version")"
+git commit -m "docs: update documentation for v0.1.2"
 git push origin main
 ```
 
